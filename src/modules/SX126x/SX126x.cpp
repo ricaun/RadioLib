@@ -1001,6 +1001,21 @@ int16_t SX126x::setCRC(uint8_t len, uint16_t initial, uint16_t polynomial, bool 
   return(ERR_UNKNOWN);
 }
 
+int16_t SX126x::setCRC(bool enableCRC) {
+  // check active modem
+  uint8_t modem = getPacketType();
+  
+  if(modem == SX126X_PACKET_TYPE_LORA) {
+    if(enableCRC) {
+      _crcType = SX126X_LORA_CRC_ON;
+    } else {
+      _crcType = SX126X_LORA_CRC_OFF;
+    }
+    return(setPacketParams(_preambleLength, _crcType, _implicitLen, _headerType, _invertIQ));
+  }
+  return(ERR_UNKNOWN);
+}
+
  int16_t SX126x::setInvertIQ(bool invertIQ)
  {
    if (invertIQ)

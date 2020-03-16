@@ -723,6 +723,15 @@ class SX126x: public PhysicalLayer {
     int16_t setCRC(uint8_t len, uint16_t initial = 0x1D0F, uint16_t polynomial = 0x1021, bool inverted = true);
 
     /*!
+      \brief Enables/disables CRC check of received packets.
+
+      \param enableCRC Enable (true) or disable (false) CRC.
+
+      \returns \ref status_codes
+    */
+    int16_t setCRC(bool enableCRC);
+
+    /*!
       \brief Sets InvertIQ configuration.
 
       \param inverted Invert IQ packege.
