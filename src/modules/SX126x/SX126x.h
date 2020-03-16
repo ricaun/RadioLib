@@ -595,7 +595,9 @@ class SX126x: public PhysicalLayer {
 
       \returns \ref status_codes
     */
-    int16_t setSyncWord(uint8_t syncWord, uint8_t controlBits = 0x44);
+    int16_t setSyncWord(uint8_t syncWord, uint8_t controlBits);
+    
+    int16_t setSyncWord(uint8_t syncWord);
 
     /*!
       \brief Sets current protection limit. Can be set in 0.25 mA steps.
@@ -721,11 +723,21 @@ class SX126x: public PhysicalLayer {
     int16_t setCRC(uint8_t len, uint16_t initial = 0x1D0F, uint16_t polynomial = 0x1021, bool inverted = true);
 
     /*!
+      \brief Sets InvertIQ configuration.
+
+      \param inverted Invert IQ packege.
+
+      \returns \ref status_codes
+    */
+
+    int16_t setInvertIQ(bool invertIQ);
+
+    /*!
       \brief Sets FSK whitening parameters.
 
       \param enabled True = Whitening enabled
 
-      \param initial Initial value used for the whitening LFSR in FSK mode. Defaults to 0x0100, use 0x01FF for SX127x compatibility.
+      \param initial Initial value used for the whitening LFSR in FSK mode.
 
       \returns \ref status_codes
     */
@@ -889,7 +901,7 @@ class SX126x: public PhysicalLayer {
 #endif
     Module* _mod;
 
-    uint8_t _bw, _sf, _cr, _ldro, _crcType, _headerType;
+    uint8_t _bw, _sf, _cr, _ldro, _crcType, _headerType, _invertIQ;
     uint16_t _preambleLength;
     float _bwKhz;
 

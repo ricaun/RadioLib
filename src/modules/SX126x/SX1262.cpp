@@ -73,6 +73,11 @@ int16_t SX1262::setFrequency(float freq, bool calibrate) {
   return(SX126x::setFrequencyRaw(freq));
 }
 
+int16_t SX1262::setFrequency(float freq) {
+  bool calibrate = true;
+  return SX1262::setFrequency(freq, calibrate);
+}
+
 int16_t SX1262::setOutputPower(int8_t power) {
   // check allowed power range
   if (!((power >= -17) && (power <= 22))) {

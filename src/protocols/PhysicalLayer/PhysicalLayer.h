@@ -224,6 +224,19 @@ class PhysicalLayer {
    */
    virtual size_t getPacketLength(bool update = true) = 0;
 
+    /*
+      LoRa
+    */
+    virtual int16_t setFrequency(float freq) { return (ERR_NONE); };
+    virtual int16_t setSpreadingFactor(uint8_t sf) { return (ERR_NONE); };
+    virtual int16_t setBandwidth(float bw) { return (ERR_NONE); };
+    virtual int16_t setCodingRate(uint8_t cr) { return (ERR_NONE); };
+    virtual int16_t setCRC(bool enableCRC) { return (ERR_NONE); };
+    virtual int16_t setInvertIQ(bool invertIQ) { return (ERR_NONE); };
+    virtual int16_t setSyncWord(uint8_t syncWord) { return (ERR_NONE); };
+    virtual int16_t setPreambleLength(uint16_t preambleLength) { return (ERR_NONE); };
+
+
 #ifndef RADIOLIB_GODMODE
   private:
 #endif

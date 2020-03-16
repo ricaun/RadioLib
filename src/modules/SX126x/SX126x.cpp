@@ -23,6 +23,7 @@ int16_t SX126x::begin(float bw, uint8_t sf, uint8_t cr, uint8_t syncWord, float 
   _tcxoDelay = 0;
   _headerType = SX126X_LORA_HEADER_EXPLICIT;
   _implicitLen = 0xFF;
+  _invertIQ = SX126X_LORA_IQ_STANDARD;
 
   // reset the module and verify startup
   int16_t state = reset();
@@ -404,7 +405,7 @@ int16_t SX126x::startTransmit(uint8_t* data, size_t len, uint8_t addr) {
   int16_t state = ERR_NONE;
   uint8_t modem = getPacketType();
   if(modem == SX126X_PACKET_TYPE_LORA) {
-    state = setPacketParams(_preambleLength, _crcType, len, _headerType);
+    state = setPacketParams(_preambleLength, _crcType, len, _headerType, _invertIQ);
   } else if(modem == SX126X_PACKET_TYPE_GFSK) {
     state = setPacketParamsFSK(_preambleLengthFSK, _crcTypeFSK, _syncWordLength, _addrComp, _whitening, _packetType, len);
   } else {
@@ -535,7 +536,7 @@ int16_t SX126x::startReceiveCommon() {
 
   // set implicit mode and expected len if applicable
   if(_headerType == SX126X_LORA_HEADER_IMPLICIT && getPacketType() == SX126X_PACKET_TYPE_LORA) {
-    state = setPacketParams(_preambleLength, _crcType, _implicitLen, _headerType);
+    state = setPacketParams(_preambleLength, _crcType, _implicitLen, _headerType, _invertIQ);
     RADIOLIB_ASSERT(state);
   }
 
@@ -670,6 +671,11 @@ int16_t SX126x::setSyncWord(uint8_t syncWord, uint8_t controlBits) {
   return(writeRegister(SX126X_REG_LORA_SYNC_WORD_MSB, data, 2));
 }
 
+int16_t SX126x::setSyncWord(uint8_t syncWord) {
+  uint8_t controlBits = 0x44;
+  return SX126x::setSyncWord(syncWord, controlBits);
+}
+
 int16_t SX126x::setCurrentLimit(float currentLimit) {
   // check allowed range
   if(!((currentLimit >= 0) && (currentLimit <= 140))) {
@@ -696,7 +702,7 @@ int16_t SX126x::setPreambleLength(uint16_t preambleLength) {
   uint8_t modem = getPacketType();
   if(modem == SX126X_PACKET_TYPE_LORA) {
     _preambleLength = preambleLength;
-    return(setPacketParams(_preambleLength, _crcType, _implicitLen, _headerType));
+    return(setPacketParams(_preambleLength, _crcType, _implicitLen, _headerType, _invertIQ));
   } else if(modem == SX126X_PACKET_TYPE_GFSK) {
     _preambleLengthFSK = preambleLength;
     return(setPacketParamsFSK(_preambleLengthFSK, _crcTypeFSK, _syncWordLength, _addrComp, _whitening, _packetType));
@@ -989,11 +995,27 @@ int16_t SX126x::setCRC(uint8_t len, uint16_t initial, uint16_t polynomial, bool 
       _crcType = SX126X_LORA_CRC_OFF;
     }
 
-    return(setPacketParams(_preambleLength, _crcType, _implicitLen, _headerType));
+    return(setPacketParams(_preambleLength, _crcType, _implicitLen, _headerType, _invertIQ));
   }
 
   return(ERR_UNKNOWN);
 }
+
+ int16_t SX126x::setInvertIQ(bool invertIQ)
+ {
+   if (invertIQ)
+   {
+     _invertIQ = SX126X_LORA_IQ_INVERTED;
+   }
+   else
+   {
+     _invertIQ = SX126X_LORA_IQ_STANDARD;
+   }
+   int16_t state = ERR_NONE;
+   state = setPacketParams(_preambleLength, _crcType, _implicitLen, _headerType, _invertIQ);
+   RADIOLIB_ASSERT(state);
+   return state;
+ }
 
 int16_t SX126x::setWhitening(bool enabled, uint16_t initial) {
   // check active modem
@@ -1285,7 +1307,7 @@ int16_t SX126x::setHeaderType(uint8_t headerType, size_t len) {
   }
 
   // set requested packet mode
-  int16_t state = setPacketParams(_preambleLength, _crcType, len, headerType);
+  int16_t state = setPacketParams(_preambleLength, _crcType, len, headerType, _invertIQ);
   RADIOLIB_ASSERT(state);
 
   // update cached value
